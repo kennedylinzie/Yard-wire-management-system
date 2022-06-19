@@ -1,0 +1,145 @@
+using SimpleJSON;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Command : MonoBehaviour
+{
+    public static Command Instance;
+    public Web web_;
+    public Train_model train_Model;
+    public SearchableDropDown s_drop;
+    public DragDrop dd_;
+    public slide_updown_anim updown_anim;
+    public slide_objectlist_updown_anim updown_anim_objectlist;
+    public Manager manage;
+    public active_train_motherbox train_list;
+    public TabButtonUI tab_but_ui;
+    public train_conduit t_conduit;
+    public train_instance_holder train_instance;
+    public Summery_generator sam_generator;
+    public CSVWriter csv;
+    public note_item_Class note_item;
+    public note_item_class_night note_item_night;
+    public player_prefs prefs;
+    Action<String> _conn;
+    public Perfomance_code perf_code;
+    public Perfomance_code_night perf_code_night;
+    public GameObject online;
+    public GameObject offline;
+
+
+
+
+
+    private void Start()
+    {
+        Instance = this;
+
+        web_ = GetComponent<Web>();
+        train_Model = GetComponent<Train_model>();
+        s_drop = GetComponent<SearchableDropDown>();
+        dd_ = GetComponent<DragDrop>();
+        updown_anim = FindObjectOfType<slide_updown_anim>();
+        updown_anim_objectlist = FindObjectOfType<slide_objectlist_updown_anim>();
+        manage = GetComponent<Manager>();
+        train_list = GetComponent<active_train_motherbox>();
+        tab_but_ui = GetComponent<TabButtonUI>();
+        t_conduit = GetComponent<train_conduit>();
+        sam_generator = GetComponent<Summery_generator>();
+        train_instance = GetComponent<train_instance_holder>();
+        csv = GetComponent<CSVWriter>();
+        perf_code = GetComponent<Perfomance_code>();
+        perf_code_night = GetComponent<Perfomance_code_night>();
+        note_item = GetComponent<note_item_Class>();
+        note_item_night = GetComponent<note_item_class_night>();
+        prefs = GetComponent<player_prefs>();
+        offline.SetActive(false);
+        Start_date_coroutine();
+    }
+
+    public void get_references()
+    {
+        //Debug.Log("...............CALLED.............");
+        s_drop = FindObjectOfType<SearchableDropDown>();
+        dd_ = FindObjectOfType<DragDrop>();
+        updown_anim_objectlist = FindObjectOfType<slide_objectlist_updown_anim>();
+        t_conduit = FindObjectOfType<train_conduit>();
+        train_instance = FindObjectOfType<train_instance_holder>();
+        csv = FindObjectOfType<CSVWriter>();
+        perf_code = FindObjectOfType<Perfomance_code>();
+        perf_code_night = FindObjectOfType<Perfomance_code_night>();
+        note_item = FindObjectOfType<note_item_Class>();
+        note_item_night = FindObjectOfType<note_item_class_night>();
+        prefs = FindObjectOfType<player_prefs>();
+    }
+
+
+    void check_connection_status()
+    {
+        connection();
+    }
+    public void Stop_date_coroutine()
+    {
+  
+        CancelInvoke("check_connection_status");
+    }
+    public void Start_date_coroutine()
+    {
+        InvokeRepeating("check_connection_status", 2.0f, 1f);
+    }
+
+
+
+
+    public void connection()
+    {
+
+        _conn = (connect) =>
+        {
+
+            StartCoroutine(make_connection(connect));
+
+        };
+
+        StartCoroutine(Command.Instance.web_.Test_connection(_conn));
+
+    }
+    public IEnumerator make_connection(string jsonArraystring_)
+    {
+
+       // Debug.Log(jsonArraystring_);
+
+        if (jsonArraystring_.Equals("Cannot connect to destination host"))
+        {
+            if (online != null) 
+            {
+                online.SetActive(false);
+            }
+            if (offline != null)
+            {
+                offline.SetActive(true);
+            }
+          
+        } else if (jsonArraystring_.Equals("root@localhost")) 
+        {
+
+            if (online != null)
+            {
+                online.SetActive(true);
+            }
+              
+            if (offline != null)
+            {
+                offline.SetActive(false);
+            }
+               
+        }
+
+
+            yield return null;
+        
+
+    }
+}

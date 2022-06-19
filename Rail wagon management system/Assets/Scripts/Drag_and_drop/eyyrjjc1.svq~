@@ -1,0 +1,304 @@
+using SimpleJSON;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using EasyUI.Popup;
+
+
+public class DragDrop : MonoBehaviour,IPointerDownHandler,IBeginDragHandler,IEndDragHandler,IDragHandler,IDropHandler,IPointerClickHandler
+{
+    private const double x_left_limit = -940.189;
+    private const double x_right_limit = 938.2852;
+    private const double y_bottom_limit = -456.624;
+    private const double y_top_limit = 480.476;
+    private RectTransform rectTransform;
+    [SerializeField] private Canvas canvas;
+
+    private CanvasGroup canvasGroup;
+    private Image danger_color;
+   // public GameObject double_click_menu;
+    public  Text train_name;
+    private Vector2 temp_pos;
+
+    public string vehicle_type;
+    public string wagon_type;
+    public string series;
+    public string last_event;
+    public string status;
+    public string yard_sector;
+    public string line;
+    public string vehicle_number;
+    public string number_of_wagons;
+
+    public string positionx;
+    public string positiony;
+
+
+    Action<String> _getvehicle_data;
+    Action<String> _updateposition_data;
+    public SearchableDropDown seachDrop;
+
+    //public Text wag_amount;
+
+
+
+
+    private void Start()
+    {
+        canvas = GetComponentInParent<Canvas>();
+        seachDrop = new SearchableDropDown();
+    
+        //rectTransform.anchoredPosition = new Vector2(-50f,-101f);
+        // this.double_click_menu = GameObject.FindGameObjectWithTag("train_spec_panel");
+        // train_name = GameObject.Find("title").GetComponent<Text>();
+        /// train_name.text = (this.gameObject.name+"");
+        //this.double_click_menu.SetActive(false);
+        //this.double_click_menu.transform.parent = null;
+
+        // set_wag("100");
+
+
+        _getvehicle_data = (specific_vehicle_jsonArraystring) => {
+
+            StartCoroutine(CreateVehicle_data_Routin(specific_vehicle_jsonArraystring));
+
+        };
+        StartCoroutine(Command.Instance.web_.Get_vehecle_data(this.gameObject.name, _getvehicle_data));
+
+
+        this.gameObject.transform.GetChild(2).gameObject.GetComponentInChildren<Button>().onClick.AddListener(() => {
+
+            //Debug.Log("my tag is : "+motherBox1.tag);
+            //Command.Instance.s_drop.Check_wagon_name_match_set_indicator(this.gameObject.tag);
+            seachDrop.Check_wagon_name_match_set_indicator(this.gameObject.tag);
+
+            Popup.Show("Success", "works atleast", "OK", PopupColor.Green);
+
+        });
+
+
+    }
+
+    public void set_modify_line(string line_,Vector2 pos) 
+    {
+        string posx = pos.x + "";
+        string posy = pos.y + "";
+        line = line_;
+        positionx = posx;
+        positiony = posy;
+       
+
+
+        _updateposition_data = (update_record_response) => {
+
+            StartCoroutine(_update_position_data(update_record_response));
+
+        };
+
+        StartCoroutine(Command.Instance.web_.Update_position_and_line(vehicle_number, line_, positionx,positiony, _updateposition_data));
+        Command.Instance.updown_anim.set_train_info(vehicle_type, wagon_type, series, last_event, status, yard_sector, line, vehicle_number, number_of_wagons);
+    }
+
+
+   
+
+    public IEnumerator _update_position_data(string update_record_response)
+    {
+       // Popup.Show("Success", "location updated", "OK", PopupColor.Green);
+        yield return null;
+    }
+
+
+
+
+
+
+    private void Awake()
+    {
+
+       
+        rectTransform = GetComponent<RectTransform>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        danger_color = GetComponent<Image>();
+
+        //wag_amount = GetComponent<Text>();
+        // train_name = GameObject.Find("title") as Text;
+        // double_click_menu.SetActive(false);
+
+        //rectTransform.anchoredPosition = new Vector2(209,40);
+    }
+
+
+
+   
+
+
+public IEnumerator CreateVehicle_data_Routin(string specific_vehicle_jsonArraystring_)
+{
+    //Parsing json array
+    JSONArray jsonArray_data_vehicles = JSON.Parse(specific_vehicle_jsonArraystring_) as JSONArray;
+
+    for (int i = 0; i < jsonArray_data_vehicles.Count; i++)
+    {
+
+
+
+        string transaction_id = jsonArray_data_vehicles[i].AsObject["transaction_id"];
+        string Relesed_from_system = jsonArray_data_vehicles[i].AsObject["Relesed_from_system"];
+        vehicle_type = jsonArray_data_vehicles[i].AsObject["Vehicle_Type"];
+        line = jsonArray_data_vehicles[i].AsObject["Line"];
+        yard_sector = jsonArray_data_vehicles[i].AsObject["Yard_Sector"];
+        wagon_type = jsonArray_data_vehicles[i].AsObject["Wagon_type"];
+        number_of_wagons = jsonArray_data_vehicles[i].AsObject["No_of_wagons"];
+        wagon_type = jsonArray_data_vehicles[i].AsObject["Wagon_type"];
+        series = jsonArray_data_vehicles[i].AsObject["Series"];
+        vehicle_number = jsonArray_data_vehicles [i].AsObject["Vehicle"];
+        last_event = jsonArray_data_vehicles[i].AsObject["Date_Hour_Last_Event"];
+        status = jsonArray_data_vehicles[i].AsObject["Status"];
+
+
+
+     
+
+    }
+    yield return null;
+}
+
+
+
+
+
+
+
+
+    /*
+    public void clean_POPUPS()
+    {
+        this.double_click_menu.SetActive(false);
+    }
+    */
+   
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnBegindrag");
+        canvasGroup.alpha = .6f;
+        canvasGroup.blocksRaycasts = false;
+        temp_pos = rectTransform.position;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        Debug.Log("i drag");
+        //rectTransform.anchoredPosition += eventData.delta;
+        rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
+
+        if (rectTransform.anchoredPosition.x < x_left_limit)
+        {
+            Debug.Log("--------------------------------");
+            danger_color.color = Color.red;
+
+
+        }
+       else if (rectTransform.anchoredPosition.x > x_right_limit)
+        {
+            Debug.Log("+++++++++++++++++++++++++++++++++");
+            danger_color.color = Color.red;
+        }
+       else if (rectTransform.anchoredPosition.y < y_bottom_limit)
+        {
+            Debug.Log("--------------------------------");
+            danger_color.color = Color.red;
+        }
+       else if (rectTransform.anchoredPosition.y > y_top_limit)
+        {
+            Debug.Log("+++++++++++++++++++++++++++++++++");
+            danger_color.color = Color.red;
+        }
+        else
+        {
+            danger_color.color = Color.white;
+        }
+
+        // rectTransform.anchoredPosition += eventData.delta;
+    }
+
+   
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnEnddrag");
+        canvasGroup.alpha = 1f;
+        canvasGroup.blocksRaycasts = true;
+
+        if (rectTransform.anchoredPosition.x < x_left_limit)
+        {
+            Debug.Log("--------------------------------");
+            rectTransform.position = temp_pos;
+        }
+        else if (rectTransform.anchoredPosition.x > x_right_limit)
+        {
+            Debug.Log("+++++++++++++++++++++++++++++++++");
+            rectTransform.position = temp_pos;
+        }
+       else if (rectTransform.anchoredPosition.y < y_bottom_limit)
+        {
+            Debug.Log("--------------------------------");
+            rectTransform.position = temp_pos;
+        }
+       else if (rectTransform.anchoredPosition.y > y_top_limit)
+        {
+            Debug.Log("+++++++++++++++++++++++++++++++++");
+            rectTransform.position = temp_pos;
+        }
+     
+            danger_color.color = Color.white;
+       
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        Debug.Log("OnPointerDown");
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+        Debug.Log("I DROPPED IT");
+    }
+
+    
+    float lastClick = 0f;
+    float interval = 0.4f;
+   
+    public void OnPointerClick(PointerEventData eventData)
+    {
+   
+        if ((lastClick + interval) > Time.time)
+        {
+            /*
+    vehicle_type;
+    wagon_type;
+    series;
+    last_event;
+     status;
+   yard_sector;
+     line;
+    vehicle_number;
+    number_of_wagons;
+            */
+
+    Debug.Log("Double CLICKED");
+            Command.Instance.updown_anim.ShowHideMenu();
+            Command.Instance.updown_anim.set_train_info(vehicle_type, wagon_type, series, last_event, status, yard_sector, line, vehicle_number, number_of_wagons);
+        }
+        else {
+            Debug.Log("SINGLE CLICKED");
+        }
+        lastClick = Time.time;
+            
+    }
+    
+}

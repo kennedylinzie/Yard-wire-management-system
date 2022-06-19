@@ -1,0 +1,30 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+public class itemslot : MonoBehaviour, IDropHandler
+{
+    [SerializeField] private Canvas canvas;
+
+    private void Start()
+    {
+        canvas = GetComponentInParent<Canvas>();
+        //rectTransform.anchoredPosition = new Vector2(-50f,-101f);
+      
+
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+       
+
+        Debug.Log("i droped");
+        if (eventData.pointerDrag != null)
+        {
+            eventData.pointerDrag.GetComponent<RectTransform>().anchoredPosition  = GetComponent<RectTransform>().anchoredPosition; 
+            eventData.pointerDrag.GetComponent<RectTransform>().eulerAngles = GetComponent<RectTransform>().eulerAngles;
+        }
+    }
+
+}

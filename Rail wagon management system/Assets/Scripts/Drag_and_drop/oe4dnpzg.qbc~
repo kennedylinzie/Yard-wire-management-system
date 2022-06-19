@@ -1,0 +1,86 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Manager : MonoBehaviour
+{
+   
+
+    // Reference to the Prefab. Drag a Prefab into this field in the Inspector.
+    public GameObject myPrefab;
+    public GameObject[] shadows;
+    public GameObject[] train_parts;
+    public float x_inc_for_shadow_value;
+
+    public float x_value_for_shadow;
+    public float y_value_for_shadow;
+
+    public float y_inc_for_parts;
+    public float y_inc_for_shadow;
+
+    public float x_value_for_parts;
+    public float y_value_for_parts;
+    public float count_before_turn = 0;
+    public float count_before_turn_for_parts = 0;
+
+
+
+    // 0 head
+    // 1 pasenger
+    // 2 empty
+    // 3 covered 
+    // 4 coal
+    // 5 tank
+
+    int[] layout = {0,5,2,5,2,3,4,4,1,2,4, 5, 2, 5, 2, 3, 4, 4, 1, 2, 4, 5, 2, 5, 2, 3, 4, 4, 1, 2, 4, 5, 2, 5, 2, 3, 4, 4, 1, 2, 4,
+    5,2,5,2,3,4,4,1,2,4,5,2,5,2,3,4,4,1,2,4,5,2,5,2,3,4,4,1,2,4,5,2,5,2,3,4,4,1,2,4,5,2,5,2,3,4,4,1,2,4,5,2,5,2,3,4,4,1,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
+
+    void Start()
+    {
+        x_inc_for_shadow_value = 90;
+        x_value_for_shadow     = -284.923f;
+        x_value_for_parts      = -284.923f;
+
+        y_inc_for_parts        = 0;//100
+        y_inc_for_shadow = 0;//100
+        y_value_for_shadow     = 276.5197f;
+        y_value_for_parts      = 276.5197f;
+
+
+
+        for (int i = 0; i < layout.Length; i++)
+        {
+            GameObject motherBox = Instantiate(shadows[layout[i]], transform.position, transform.rotation) as GameObject;
+           
+            if (count_before_turn > 19)
+            {
+                x_value_for_shadow = -284.923f;
+                count_before_turn = 0;
+                y_inc_for_shadow += 30;
+            }         
+            motherBox.GetComponent<RectTransform>().anchoredPosition = new Vector2(x_value_for_shadow, y_value_for_shadow - y_inc_for_shadow); 
+            //motherBox.name = gameObject.name;
+            motherBox.transform.SetParent(GameObject.FindGameObjectWithTag("motherbox").transform, false);
+            x_value_for_shadow = x_value_for_shadow + x_inc_for_shadow_value;
+            count_before_turn++;
+        }
+        for (int parts = 0; parts < layout.Length; parts++)
+        {
+            GameObject motherBox1 = Instantiate(train_parts[layout[parts]], transform.position, transform.rotation) as GameObject;
+            if (count_before_turn_for_parts > 19)
+            {
+                x_value_for_parts = -284.923f;
+                count_before_turn_for_parts = 0;
+                y_inc_for_parts += 30;
+            }
+            motherBox1.GetComponent<RectTransform>().anchoredPosition = new Vector2(x_value_for_parts, y_value_for_parts - y_inc_for_parts);
+            // motherBox1.name = gameObject.name;
+            motherBox1.transform.SetParent(GameObject.FindGameObjectWithTag("motherbox").transform, false);
+            x_value_for_parts = x_value_for_parts + x_inc_for_shadow_value;
+            count_before_turn_for_parts++;
+        }
+
+    }
+
+
+}

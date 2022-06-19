@@ -1,0 +1,59 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+public class DragDrop : MonoBehaviour,IPointerDownHandler,IBeginDragHandler,IEndDragHandler,IDragHandler,IDropHandler
+{
+    private RectTransform rectTransform;
+    [SerializeField] private Canvas canvas;
+    private CanvasGroup canvasGroup;
+
+
+    private void Awake()
+    {
+        
+        
+        rectTransform = GetComponent<RectTransform>();
+        canvasGroup = GetComponent<CanvasGroup>();
+
+        //rectTransform.anchoredPosition = new Vector2(209,40);
+    }
+    private void Start()
+    {
+        canvas = GetComponentInParent<Canvas>();
+        rectTransform.anchoredPosition = new Vector2(-162f,-66f);  
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnBegindrag");
+        canvasGroup.alpha = .6f;
+        canvasGroup.blocksRaycasts = false;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        Debug.Log("i drag");
+        rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
+    }
+
+   
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnEnddrag");
+        canvasGroup.alpha = 1f;
+        canvasGroup.blocksRaycasts = true;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        Debug.Log("OnPointerDown");
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+        Debug.Log("I DROPPED IT");
+    }
+}

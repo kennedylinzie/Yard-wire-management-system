@@ -1,0 +1,102 @@
+using SimpleJSON;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Command : MonoBehaviour
+{
+    public static Command Instance;
+    public Web web_;
+    public Train_model train_Model;
+    public SearchableDropDown s_drop;
+    public DragDrop dd_;
+    public slide_updown_anim updown_anim;
+    public Manager manage;
+    Action<String> _conn;
+
+    public GameObject online;
+    public GameObject offline;
+
+    private void Start()
+    {
+        Instance = this;
+
+        web_ = GetComponent<Web>();
+        train_Model = GetComponent<Train_model>();
+        s_drop = GetComponent<SearchableDropDown>();
+        dd_ = GetComponent<DragDrop>();
+        updown_anim = FindObjectOfType<slide_updown_anim>();
+        manage = GetComponent<Manager>();
+
+        Start_date_coroutine();
+    }
+
+
+    void check_connection_status()
+    {
+        connection();
+    }
+    public void Stop_date_coroutine()
+    {
+  
+        CancelInvoke("check_connection_status");
+    }
+    public void Start_date_coroutine()
+    {
+        InvokeRepeating("check_connection_status", 2.0f, 1f);
+    }
+
+
+
+
+    public void connection()
+    {
+
+        _conn = (connect) =>
+        {
+
+            StartCoroutine(make_connection(connect));
+
+        };
+
+        StartCoroutine(Command.Instance.web_.Test_connection(_conn));
+
+    }
+    public IEnumerator make_connection(string jsonArraystring_)
+    {
+
+        Debug.Log(jsonArraystring_);
+
+        if (jsonArraystring_.Equals("Cannot connect to destination host"))
+        {
+            if (online != null) 
+            {
+                online.SetActive(false);
+            }
+            if (offline != null)
+            {
+                offline.SetActive(true);
+            }
+          
+        } else if (jsonArraystring_.Equals("root@localhost")) 
+        {
+
+            if (online != null)
+            {
+                online.SetActive(true);
+            }
+              
+            if (offline != null)
+            {
+                offline.SetActive(false);
+            }
+               
+        }
+
+
+            yield return null;
+        
+
+    }
+}

@@ -1,0 +1,57 @@
+using SimpleJSON;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class login_form : MonoBehaviour
+{
+    public InputField USER_id_Input;
+    public InputField PasswordInput;
+    public Button LoginButton;
+    public GameObject reg_form;
+    Action<String> the_login_man;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
+
+        LoginButton.onClick.AddListener(() => {
+
+            if (USER_id_Input.text.Equals("") || PasswordInput.text.Equals(""))
+            {
+                Debug.Log("make sure all inputs are filled");
+                return;
+
+            }
+
+            the_login_man = (specific_vehicle_jsonArraystring) => {
+
+                StartCoroutine(Create_login_q(specific_vehicle_jsonArraystring));
+
+            };
+
+            StartCoroutine(Command.Instance.web_.Login_user(USER_id_Input.text, PasswordInput.text));
+
+            // Command.Instance.web_.Login_user();
+
+        });
+    }
+
+
+    public IEnumerator Create_login_q(string jsonArraystring_)
+    {
+        Debug.Log("Your ouput is "+jsonArraystring_);
+
+        yield return null;
+    }
+
+
+    public void reveal_reg()
+    {
+        reg_form.SetActive(true);
+        this.gameObject.SetActive(false);
+    }
+}
